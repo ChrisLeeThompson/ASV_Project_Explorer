@@ -1,0 +1,13 @@
+# ASV Project Explorer - Python Dependencies
+
+# Qt GUI framework
+PySide6>=6.8.0
+
+# Scientific plotting
+matplotlib>=3.8.0
+
+# Numerical computing (also a matplotlib dependency)
+numpy>=1.26.0
+
+# TIFF file reading and metadata extraction
+tifffile>=2024.1.30
