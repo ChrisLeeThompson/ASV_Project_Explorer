@@ -1,0 +1,834 @@
+{
+    "_comment": "Configuration file for the ASV Project Explorer UI.",
+    "_version": "1.3",
+    "TemporaryJSONFileDirectoryName": "_temp_output_JSON_file",
+    "TemporaryConsolidatedJSONFileName": "_temp_consolidated_metadata.json",
+    "ExportPlotDirectoryName": "Exported_Plots",
+    "DefaultSavedJSONFileName": "Consolidated_ASV_Metadata.json",
+    "MinifyExportedJSON": true,
+    "ShowTrendLineByDefault": true,
+    "ASVProjectDirectoryConfig": {
+        "_comment": "Configuration for parsing ASV project directories. File names in the validation list must be in the ASV project root directory to begin parsing.",
+        "ProjectRootDirectories": {
+            "DirectoriesToInclude": [],
+            "DirectoriesToExclude": [
+                "ProjectLogs",
+                "ImageLogs"
+            ]
+        },
+        "SiteSubDirectories": {
+            "DirectoriesToInclude": [
+                "Acquired"
+            ],
+            "DirectoriesToExclude": [
+                "SetupImages"
+            ]
+        },
+        "ImageLogsDirectories": {
+            "DirectoriesToInclude": [
+                "Auto Stigmator"
+            ],
+            "DirectoriesToExclude": [
+                "Area Preparation",
+                "Milling",
+                "Auto Focus"
+            ]
+        },
+        "ParseProjectRootFiles": [
+            {
+                "Name": "ExecutionHistory.json",
+                "Parse": true
+            },
+            {
+                "Name": "Project.AsvProject",
+                "Parse": true
+            }
+        ],
+        "ValidationFiles": [
+            "ExecutionHistory.json",
+            "Metadata.json",
+            "Project.AsvProject"
+        ]
+    },
+    "MetadataToPlotConfig": {
+        "_comment": "Metadata to plot in the UI. All plots are against slice index (x-axis: slice index). The plots are ordered alphabetically in the Plot Type combo box. Set a field's 'DecimalPlaces' to an integer to round its plotted value to that many decimals (0 = whole number); leave it null to keep the full-precision metadata value. Set a field's 'PlotAsText' to true to plot its raw text values on a categorical y-axis (categories sorted alphabetically, bottom to top); text plots have no unit, trend line, or statistics box. Omit or set false for normal numeric plotting. Set a field's 'ConvertToUnit' to a temperature unit (K/kelvin, C/°C/celsius, F/°F/fahrenheit - case-insensitive) to convert plotted values from the field's source unit (the unit detected in the data, else 'Unit') before display; the y-axis label shows the ConvertToUnit text verbatim. Unknown or incompatible units log a console warning and the original values and unit are plotted. Omit or leave blank for no conversion.",
+        "Fields": [
+            {
+                "Path": "MicroscopeMetadata.IBeam.Source",
+                "Label": "FIB Source",
+                "Unit": "",
+                "Group": "Microscope Metadata",
+                "DecimalPlaces": null,
+                "PlotAsText": true
+            },
+            {
+                "Path": "MicroscopeMetadata.Specimen.CryoStageTemperature",
+                "Label": "Cryo Stage Temperature",
+                "Unit": "K",
+                "Group": "Microscope Metadata",
+                "DecimalPlaces": 2,
+                "ConvertToUnit": "C"
+            },
+            {
+                "Path": "MicroscopeMetadata.Specimen.CryoShieldTemperature",
+                "Label": "Cryo Shield Temperature",
+                "Unit": "K",
+                "Group": "Microscope Metadata",
+                "DecimalPlaces": 2,
+                "ConvertToUnit": "C"
+            },
+            {
+                "Path": "MicroscopeMetadata.EBeam.HFW",
+                "Label": "HFW",
+                "Unit": "m",
+                "Group": "Microscope Metadata",
+                "DecimalPlaces": 6
+            },
+            {
+                "Path": "MicroscopeMetadata.IBeam.HFW",
+                "Label": "FIB HFW",
+                "Unit": "m",
+                "Group": "Microscope Metadata",
+                "DecimalPlaces": 6
+            },
+            {
+                "Path": "ASVXMLMetadata.BinaryResult.ImageSize.X",
+                "Label": "Image Size X",
+                "Unit": "",
+                "Group": "Binary Result",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.BinaryResult.ImageSize.Y",
+                "Label": "Image Size Y",
+                "Unit": "",
+                "Group": "Binary Result",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "MicroscopeMetadata.EBeamDeceleration.LandingEnergy",
+                "Label": "Landing Energy",
+                "Unit": "V",
+                "Group": "Microscope Metadata",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "MicroscopeMetadata.EBeamDeceleration.StageBias",
+                "Label": "Stage Bias",
+                "Unit": "V",
+                "Group": "Microscope Metadata",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Acquisition.AcquisitionDatetime",
+                "Label": "Acquisition Datetime",
+                "Unit": "",
+                "Group": "Acquisition",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.GunTiltRaw.X",
+                "Label": "Gun Tilt X",
+                "Unit": "",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.GunTiltRaw.Y",
+                "Label": "Gun Tilt Y",
+                "Unit": "",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.AccelerationVoltage",
+                "Label": "Acceleration Voltage",
+                "Unit": "V",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.BeamCurrent",
+                "Label": "Beam Current",
+                "Unit": "A",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.CustomSectionGroup.CustomSection.Metrics.MeasuredBeamCurrent",
+                "Label": "FIB Measured Current (ASV)",
+                "Unit": "A",
+                "Group": "Metrics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "MicroscopeMetadata.IBeam.BeamCurrent",
+                "Label": "FIB Current (MicroscopeMetadata)",
+                "Unit": "A",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.WorkingDistance",
+                "Label": "Working Distance",
+                "Unit": "m",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.BeamShift.X",
+                "Label": "Beam Shift X",
+                "Unit": "m",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.BeamShift.Y",
+                "Label": "Beam Shift Y",
+                "Unit": "m",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.CustomSectionGroup.CustomSection.Metrics.SourceAcceleratorVoltage",
+                "Label": "FIB Acceleration Voltage",
+                "Unit": "kV",
+                "Group": "Metrics",
+                "DecimalPlaces": 4
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.StigmatorRaw.X",
+                "Label": "Stigmator Raw X",
+                "Unit": "",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Optics.StigmatorRaw.Y",
+                "Label": "Stigmator Raw Y",
+                "Unit": "",
+                "Group": "Optics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.StageSettings.StagePosition.X",
+                "Label": "Stage Position X",
+                "Unit": "m",
+                "Group": "Stage Settings",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.StageSettings.StagePosition.Y",
+                "Label": "Stage Position Y",
+                "Unit": "m",
+                "Group": "Stage Settings",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.StageSettings.StagePosition.Z",
+                "Label": "Stage Position Z",
+                "Unit": "m",
+                "Group": "Stage Settings",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.StageSettings.StagePosition.Rotation",
+                "Label": "Stage Rotation",
+                "Unit": "rad",
+                "Group": "Stage Settings",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.StageSettings.StagePosition.Tilt.Alpha",
+                "Label": "Stage Tilt Alpha",
+                "Unit": "rad",
+                "Group": "Stage Settings",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.ScanSettings.FrameTime",
+                "Label": "Frame Time",
+                "Unit": "s",
+                "Group": "Scan Settings",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.VacuumProperties.SamplePressure",
+                "Label": "Sample Pressure",
+                "Unit": "Pa",
+                "Group": "Vacuum",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.VacuumProperties.ElectronColumnPressure",
+                "Label": "Electron Column Pressure",
+                "Unit": "Pa",
+                "Group": "Vacuum",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.VacuumProperties.IonColumnPressure",
+                "Label": "Ion Column Pressure",
+                "Unit": "Pa",
+                "Group": "Vacuum",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Detectors.ScanningDetector.ContrastNormalized",
+                "Label": "Contrast (Normalized)",
+                "Unit": "%",
+                "Group": "Detectors",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.Detectors.ScanningDetector.BrightnessNormalized",
+                "Label": "Brightness (Normalized)",
+                "Unit": "%",
+                "Group": "Detectors",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.CustomSectionGroup.CustomSection.Metrics.LensAlignment.X",
+                "Label": "Lens Alignment X",
+                "Unit": "",
+                "Group": "Metrics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.CustomSectionGroup.CustomSection.Metrics.LensAlignment.Y",
+                "Label": "Lens Alignment Y",
+                "Unit": "",
+                "Group": "Metrics",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.CustomSectionGroup.CustomSection.VoxelSizeInfo.VoxelX",
+                "Label": "Voxel Size X",
+                "Unit": "nm",
+                "Group": "Voxel",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.CustomSectionGroup.CustomSection.VoxelSizeInfo.VoxelY",
+                "Label": "Voxel Size Y",
+                "Unit": "nm",
+                "Group": "Voxel",
+                "DecimalPlaces": null
+            },
+            {
+                "Path": "ASVXMLMetadata.CustomSectionGroup.CustomSection.VoxelSizeInfo.VoxelZ",
+                "Label": "Voxel Size Z",
+                "Unit": "nm",
+                "Group": "Voxel",
+                "DecimalPlaces": null
+            }
+        ]
+    },
+    "ExecutionHistoryConfig": {
+        "_comment": "Configuration for parsing ExecutionHistory.json from ASV projects. TraversalTypes define the $type hierarchy the parser follows. ActivityTypes define per-activity extraction rules. Activities not listed here will still have CommonFields extracted, but the parser will log a warning for unknown activities.",
+        "TraversalTypes": {
+            "_comment": "Ordered $type short names the parser follows through Executions.$values to reach ActivityExecutionHistory nodes.",
+            "RunLevel": "RunExecutionHistory",
+            "SiteLevel": "SiteExecutionHistory",
+            "SliceLevel": "SliceExecutionHistory",
+            "RecipeLevel": "RecipeExecutionHistory",
+            "RepeatedActivityLevel": "RepeatedActivityExecutionHistory",
+            "IterationLevel": "ActivityIterationExecutionHistory",
+            "ActivityLevel": "ActivityExecutionHistory"
+        },
+        "CommonFields": {
+            "_comment": "Fields extracted from every ActivityExecutionHistory node. Dot-notation paths are resolved relative to the activity node.",
+            "Fields": [
+                "ActivityName",
+                "StartedAt",
+                "FinishedAt",
+                "Result.Status",
+                "Result.Message"
+            ]
+        },
+        "ActivityTypes": {
+            "_comment": "Activity-specific extraction rules keyed by ActivityName as it appears in the JSON. FunctionType is used for validation against Result.FunctionType when present. DataPaths are dot-notation paths within Result.Data to extract. IncludeSharpnessData is an optional flag for activities that produce sharpness curve data.",
+            "Auto Focus": {
+                "FunctionType": "AutoFocus",
+                "DataPaths": [
+                    "OriginalWd",
+                    "FoundWd",
+                    "OptimizedWd",
+                    "Result"
+                ],
+                "IncludeSharpnessData": true
+            },
+            "Auto Stigmator": {
+                "FunctionType": "AutoStigmator",
+                "DataPaths": [
+                    "Result"
+                ]
+            },
+            "Auto Lens Alignment": {
+                "FunctionType": "AutoLensAlignment",
+                "DataPaths": [
+                    "Result"
+                ]
+            },
+            "Auto Source Tilt": {
+                "FunctionType": "AutoSourceTilt",
+                "DataPaths": [
+                    "Result"
+                ]
+            },
+            "Auto Contrast Brightness": {
+                "FunctionType": "AutoContrastBrightness",
+                "DataPaths": [
+                    "Result"
+                ]
+            },
+            "Slicing": {
+                "FunctionType": "Slicing",
+                "DataPaths": [
+                    "FiducialMatch.Score",
+                    "FiducialMatch.Threshold"
+                ]
+            },
+            "SDB Imaging": {
+                "FunctionType": null,
+                "DataPaths": []
+            },
+            "Pause for Review": {
+                "FunctionType": null,
+                "DataPaths": []
+            },
+            "Python Activity": {
+                "FunctionType": null,
+                "DataPaths": []
+            }
+        }
+    },
+    "ConsolidatedMetadataConfig": {
+        "_comment": "Configuration for consolidating ASV metadata into a single JSON file.",
+        "ProjectName": null,
+        "Sites": [
+            {
+                "SiteName": null,
+                "RelativePath": null,
+                "Steps": [
+                    {
+                        "StepName": null,
+                        "RelativePath": null,
+                        "Images": [
+                            {
+                                "ImageName": null,
+                                "RelativePath": null,
+                                "FileNameDetector": null,
+                                "FileNameSliceIndex": null,
+                                "Metadata": {
+                                    "MicroscopeMetadata": {},
+                                    "ASVXMLMetadata": {}
+                                },
+                                "ExecutionHistory": {}
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "ProjectParameters": {}
+    },
+    "ProjectFileConfig": {
+        "_comment": "Configuration for parsing Project.AsvProject files. Defines extraction rules at the site context, recipe context, and activity levels. Data is shown in the Project Parameters tab of the UI.",
+        "SiteContext": {
+            "_comment": "Fields to extract from each Site.Context subsection. Each key matches a Context subsection name. ExtractFields uses dot-notation paths resolved within that subsection.",
+            "Sections": {
+                "Slicing": {
+                    "ExtractFields": [
+                        "SliceThickness",
+                        "MilledThickness"
+                    ]
+                },
+                "Specimen": {
+                    "ExtractFields": [
+                        "SamplePreTilt",
+                        "MaterialDepthCorrection"
+                    ]
+                },
+                "Milling": {
+                    "ExtractFields": [
+                        "MillingDepth",
+                        "MillingLength",
+                        "WorkingDistance",
+                        "UsableCutFaceAreaWidth",
+                        "UsableCutFaceAreaHeight",
+                        "UsableCutFaceAreaDepth",
+                        "OffsetFromFovCenter",
+                        "ZOffset",
+                        "DetectorsSetup",
+                        "Hfw",
+                        "OriginalStagePosition",
+                        "ScanRotation",
+                        "OriginalBeamShift"
+                    ]
+                },
+                "FiducialDefinition": {
+                    "ExtractFields": [
+                        "IsDefined",
+                        "Score",
+                        "MatchThresholdModifier"
+                    ]
+                },
+                "FiducialConditions": {
+                    "ExtractFields": [
+                        "HighVoltage",
+                        "BeamCurrent",
+                        "StageTilt",
+                        "StageRotation",
+                        "FovSize",
+                        "ZOffset"
+                    ]
+                },
+                "RoughFiducialConditions": {
+                    "ExtractFields": [
+                        "IsRoughAlignmentEnabled",
+                        "HighVoltage",
+                        "BeamCurrent",
+                        "WorkingDistance",
+                        "Hfw"
+                    ]
+                },
+                "RockingMillContext": {
+                    "ExtractFields": [
+                        "IsRockingMillEnabled",
+                        "RockingMillAngles",
+                        "BeamIntensity"
+                    ]
+                },
+                "SiteImage": {
+                    "ExtractFields": [
+                        "Hfw",
+                        "Vfw",
+                        "Image.RelativePath"
+                    ]
+                },
+                "Limits": {
+                    "ExtractFields": [
+                        "FieldOfViewLimits"
+                    ]
+                }
+            }
+        },
+        "RecipeContext": {
+            "_comment": "Fields to extract from recipe-level Context sections. The ImagingContext section within SDB imaging recipes contains the resolved imaging conditions.",
+            "Sections": {
+                "ImagingContext": {
+                    "ExtractFields": [
+                        "DwellTime",
+                        "LineIntegration",
+                        "FrameIntegration",
+                        "Bitness",
+                        "PixelSize",
+                        "OpticalUseCase",
+                        "BeamCurrent",
+                        "HighVoltage",
+                        "TiltCorrection",
+                        "UseWdCorrection",
+                        "UseDigitalYShiftCorrection",
+                        "UseBeamYShiftCorrection",
+                        "UseStageYShiftCorrection",
+                        "YShiftCorrectionDirection",
+                        "DriftCorrectionMode",
+                        "DriftCorrectionBehavior",
+                        "DetectorsSetup",
+                        "VacuumOptions"
+                    ]
+                }
+            }
+        },
+        "ActivityLevel": {
+            "_comment": "Extraction rules for activity parameters within each recipe. CommonScheduleFields are extracted from every activity's Schedule. Activities defines per-activity ExtractParameters lists. Use 'ALL' to extract everything except InternalFields. The _DEFAULT_ rule applies to any activity not explicitly listed.",
+            "CommonScheduleFields": [
+                "IsEnabled",
+                "EveryN",
+                "CanAutoDisableAfterExecution",
+                "RepeatCount"
+            ],
+            "InternalFields": [
+                "AllowedDriftCorrectionModes",
+                "MinimumSizeInPixel",
+                "IsSquareFovRequired",
+                "PixelSizeMaximum",
+                "ShortName"
+            ],
+            "Activities": {
+                "Eucentric Finder": {
+                    "ExtractParameters": [
+                        "TargetTilt"
+                    ]
+                },
+                "Gases Preheating": {
+                    "ExtractParameters": []
+                },
+                "AOI Protective Layer": {
+                    "ExtractParameters": [
+                        "DepositionThickness",
+                        "ReviewPattern",
+                        "PadOffsetForCutface",
+                        "PadOffsetForMilling",
+                        "ApplicationFile",
+                        "BeamCurrentDensity",
+                        "HighVoltage"
+                    ]
+                },
+                "Fiducial Protective Layer": {
+                    "ExtractParameters": [
+                        "DepositionThickness",
+                        "ReviewPattern",
+                        "PrepareFiducialShape",
+                        "PadOffsetForMilling",
+                        "ApplicationFile",
+                        "BeamCurrentDensity",
+                        "HighVoltage"
+                    ]
+                },
+                "Create Milling Fiducial": {
+                    "ExtractParameters": [
+                        "Depth",
+                        "ApplicationFile",
+                        "BeamCurrent",
+                        "HighVoltage"
+                    ]
+                },
+                "Define Milling Fiducial": {
+                    "ExtractParameters": []
+                },
+                "Update Site Image": {
+                    "ExtractParameters": [
+                        "ShouldExecuteAcb"
+                    ]
+                },
+                "Trench Milling": {
+                    "ExtractParameters": [
+                        "UseShutter",
+                        "DepthCorrectionSlopePart",
+                        "DepthCorrectionFlatPart",
+                        "LeftTrench",
+                        "RightTrench",
+                        "RoughCut",
+                        "SideTrenchPolishing",
+                        "AlignToLeftTrench",
+                        "AlignToRightTrench",
+                        "MillingOrder",
+                        "ApplicationFileSlopePart",
+                        "ApplicationFileFlatPart",
+                        "ApplicationFileTrenchPolish",
+                        "OverlapIntoNextPattern",
+                        "BeamCurrent",
+                        "HighVoltage"
+                    ]
+                },
+                "Green Clean": {
+                    "ExtractParameters": [
+                        "UseShutter",
+                        "TotalSliceCount",
+                        "SliceThickness",
+                        "SliceDepth",
+                        "SlicesBeforeAreaOfInterest",
+                        "ApplicationFile",
+                        "OverlapThickness"
+                    ]
+                },
+                "Rocking Mill Test": {
+                    "ExtractParameters": [
+                        "RockingMillPosition"
+                    ]
+                },
+                "Slicing": {
+                    "ExtractParameters": [
+                        "UseShutter",
+                        "ApplicationFile"
+                    ]
+                },
+                "Spin Milling": {
+                    "_comment": "Spin mill template activity.",
+                    "ExtractParameters": [
+                        "SpinMillType",
+                        "DwellTime",
+                        "Pitch",
+                        "CorrectionFactor",
+                        "ApplicationFile",
+                        "MaterialTypeApplicationFile",
+                        "BeamCurrent",
+                        "HighVoltage",
+                        "TotalSlices",
+                        "NumberOfMillingPositions",
+                        "SliceThickness",
+                        "MillingAngle",
+                        "BeamDefocusCoefficient"
+                    ]
+                },
+                "Create AOI Marker": {
+                    "_comment": "Spin mill template activity.",
+                    "ExtractParameters": [
+                        "Depth",
+                        "Thickness",
+                        "ApplicationFile",
+                        "BeamCurrent",
+                        "HighVoltage"
+                    ]
+                },
+                "Define Spin Mill Position": {
+                    "_comment": "Spin mill template activity.",
+                    "ExtractParameters": []
+                },
+                "Redefine Position": {
+                    "_comment": "Spin mill template activity.",
+                    "ExtractParameters": [
+                        "PositionIndex"
+                    ]
+                },
+                "Stage Z correction": {
+                    "_comment": "Spin mill template activity.",
+                    "ExtractParameters": [
+                        "GrabReferenceEveryNthSlice",
+                        "IsEnabled"
+                    ]
+                },
+                "Auto Source Tilt": {
+                    "ExtractParameters": [
+                        "BeamType",
+                        "PositionUpdateStrategyParameters",
+                        "DwellTime",
+                        "PixelSize",
+                        "FovSize",
+                        "FrameIntegration",
+                        "LineIntegration"
+                    ]
+                },
+                "Auto Lens Alignment": {
+                    "ExtractParameters": [
+                        "BeamType",
+                        "WobblingType",
+                        "Bitness",
+                        "Color",
+                        "IsDynamicFocusEnabled",
+                        "PositionUpdateStrategyParameters",
+                        "DwellTime",
+                        "PixelSize",
+                        "FovSize",
+                        "FrameIntegration",
+                        "LineIntegration"
+                    ]
+                },
+                "Auto Stigmator": {
+                    "ExtractParameters": [
+                        "BeamType",
+                        "Type",
+                        "Color",
+                        "IsDynamicFocusEnabled",
+                        "PositionUpdateStrategyParameters",
+                        "DwellTime",
+                        "PixelSize",
+                        "FovSize",
+                        "FrameIntegration",
+                        "LineIntegration",
+                        "WdOffset",
+                        "WdBasicCorrectionStep",
+                        "StigBasicCorrectionStep",
+                        "Defaults"
+                    ]
+                },
+                "Auto Focus": {
+                    "ExtractParameters": [
+                        "BeamType",
+                        "Type",
+                        "SampleCount",
+                        "Bitness",
+                        "Color",
+                        "IsDynamicFocusEnabled",
+                        "PositionUpdateStrategyParameters",
+                        "DwellTime",
+                        "PixelSize",
+                        "FovSize",
+                        "FrameIntegration",
+                        "LineIntegration",
+                        "InitialWdStep"
+                    ]
+                },
+                "Auto Contrast Brightness": {
+                    "ExtractParameters": [
+                        "BeamType",
+                        "Type",
+                        "Color",
+                        "IsDynamicFocusEnabled",
+                        "PositionUpdateStrategyParameters",
+                        "DwellTime",
+                        "PixelSize",
+                        "FovSize",
+                        "FrameIntegration",
+                        "LineIntegration",
+                        "QuadMultiplicity",
+                        "MaxSaturatedWhitePixelsPct",
+                        "MaxSaturatedBlackPixelsPct"
+                    ]
+                },
+                "SDB Imaging": {
+                    "ExtractParameters": [
+                        "BeamType",
+                        "QuadMultiplicity",
+                        "ImagingType",
+                        "FovSize",
+                        "FovOffset",
+                        "ZOffset",
+                        "PositionUpdateStrategyParameters"
+                    ]
+                },
+                "Pause for Review": {
+                    "ExtractParameters": [
+                        "BeamType",
+                        "ActivityTimeout",
+                        "TimeoutBehavior"
+                    ]
+                },
+                "Area for Dynamic Autofunction Positions": {
+                    "ExtractParameters": [
+                        "SelectedAreaType",
+                        "BeamType",
+                        "Color",
+                        "DwellTime",
+                        "FrameIntegration",
+                        "LineIntegration",
+                        "PixelSize",
+                        "FovSize",
+                        "PositionUpdateStrategyParameters"
+                    ]
+                },
+                "Define Fiducial": {
+                    "ExtractParameters": [
+                        "BeamType",
+                        "PerformAutofunctions"
+                    ]
+                },
+                "Define Image Reference": {
+                    "ExtractParameters": [
+                        "BeamType"
+                    ]
+                },
+                "Python Activity": {
+                    "ExtractParameters": [
+                        "Path"
+                    ]
+                },
+                "Retract Devices": {
+                    "ExtractParameters": [
+                        "RetractDetectors",
+                        "RetractGis"
+                    ]
+                },
+                "Sleep When Done": {
+                    "ExtractParameters": []
+                },
+                "_DEFAULT_": {
+                    "_comment": "Fallback for any activity not explicitly listed. 'ALL' extracts every field except those in InternalFields.",
+                    "ExtractParameters": "ALL"
+                }
+            }
+        }
+    }
+}
