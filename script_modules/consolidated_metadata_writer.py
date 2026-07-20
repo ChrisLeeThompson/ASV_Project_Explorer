@@ -55,7 +55,37 @@ def write_consolidated_metadata(
         "ProjectParameters": project_parameters or {}
     }
 
-    # Ensure output directory exists
+    output_path = _write_json_atomic(
+        output_directory=output_directory,
+        output_filename=output_filename,
+        data=consolidated_data,
+        minify=minify,
+    )
+    if output_path is not None:
+        logger.info(f"Consolidated metadata written to: {output_path}")
+    return output_path
+
+
+def _write_json_atomic(
+    output_directory: Path,
+    output_filename: str,
+    data: dict,
+    minify: bool,
+) -> Path | None:
+    """
+    Write a JSON file atomically, creating the directory as needed.
+
+    Writes to a sibling temp file and renames so the file at the
+    output path is always a complete JSON, even if it is read (e.g.
+    by Save) or the app crashes mid-write.
+
+    :param output_directory: Directory to write the output file to.
+    :param output_filename: Name of the output JSON file.
+    :param data: JSON-serializable data to write.
+    :param minify: If True, write compact JSON. If False, write
+        indented JSON.
+    :return: Path to the written file, or None on failure.
+    """
     try:
         output_directory.mkdir(parents=True, exist_ok=True)
     except OSError:
@@ -66,9 +96,6 @@ def write_consolidated_metadata(
         return None
 
     output_path = output_directory / output_filename
-    # Write to a sibling temp file and rename so the file at output_path
-    # is always a complete JSON, even if it is read (e.g. by Save) or the
-    # app crashes mid-write.
     tmp_path = output_path.with_suffix(output_path.suffix + ".tmp")
 
     try:
@@ -78,15 +105,13 @@ def write_consolidated_metadata(
         else:
             dump_kwargs["indent"] = 2
         with open(tmp_path, "w", encoding="utf-8") as f:
-            json.dump(consolidated_data, f, **dump_kwargs)
+            json.dump(data, f, **dump_kwargs)
         os.replace(tmp_path, output_path)
-        logger.info(f"Consolidated metadata written to: {output_path}")
         return output_path
 
     except OSError:
         logger.error(
-            f"Failed to write consolidated metadata: {output_path}",
-            exc_info=True
+            f"Failed to write JSON file: {output_path}", exc_info=True
         )
         try:
             tmp_path.unlink(missing_ok=True)

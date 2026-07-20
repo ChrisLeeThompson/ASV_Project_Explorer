@@ -21,6 +21,7 @@ Architecture:
     between image parses by the directory parser's progress callback.
 
 """
+import json
 import logging
 import time
 import threading
@@ -31,7 +32,9 @@ from PySide6.QtCore import QObject, Signal, Slot
 from script_modules.asv_project_directory_parser import (
     discover_tif_files, parse_project_directory
 )
-from script_modules.consolidated_metadata_writer import write_consolidated_metadata
+from script_modules.consolidated_metadata_writer import (
+    write_consolidated_metadata
+)
 from script_modules.execution_history_parser import parse_execution_history
 from script_modules.project_file_parser import parse_project_file
 

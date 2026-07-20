@@ -68,6 +68,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, Slot
 from script_modules.app_styles import AppStyles
+from script_modules.widgets.combobox_widgets import CurrentItemDelegate
 
 
 logger = logging.getLogger(__name__)
@@ -413,6 +414,10 @@ class SiteContextGroupBox(QGroupBox):
         """Create combo box, search field, and tree widget."""
         # Site selector combo box
         self.site_combobox = QComboBox()
+        # Same popup behavior as the metadata-tab combos: the stylesheet
+        # paints the browsing highlight, the delegate anchors the bar on
+        # the current site.
+        self.site_combobox.setItemDelegate(CurrentItemDelegate(self.site_combobox))
         self.site_combobox.setStyleSheet(AppStyles.ComboBox.default())
         self.site_combobox.setPlaceholderText("Select site")
 

@@ -1221,14 +1221,17 @@ class ASVProjectMetadataTab(QWidget):
 
         images = steps[step_index].get("Images", [])
         detector_images = filter_images_by_detector(images, detector)
-        self._available_plot_fields = get_available_plot_fields(
-            images=detector_images,
-            plot_fields=self.config.plot_fields
+        # Keep the fields in the order the combobox presents them
+        # (casefold-alphabetical), so everything downstream — combobox
+        # population, plot display — inherits the same order.
+        self._available_plot_fields = sorted(
+            get_available_plot_fields(
+                images=detector_images,
+                plot_fields=self.config.plot_fields
+            ),
+            key=lambda field: field["Label"].casefold()
         )
-        labels = sorted(
-            (field["Label"] for field in self._available_plot_fields),
-            key=str.casefold
-        )
+        labels = [field["Label"] for field in self._available_plot_fields]
         ps.select_plots_combobox.add_checkable_items(labels)
         logger.info(f"Detector selected: {detector} "
                      f"({len(labels)} available plots)")
@@ -1294,10 +1297,15 @@ class ASVProjectMetadataTab(QWidget):
             )
             return
 
-        # Match checked labels to available plot field dicts
+        # Match checked labels to available plot field dicts.
+        # _available_plot_fields is already in combobox (alphabetical)
+        # order, so the plots added by this click follow the selection
+        # list. Plots accumulate across Display clicks, so the overall
+        # stack reads in click order, not combobox order.
+        checked = set(checked_labels)
         selected_fields = [
             field for field in self._available_plot_fields
-            if field["Label"] in checked_labels
+            if field["Label"] in checked
         ]
         if not selected_fields:
             self.status_bar.set_status_bar_message_timed(
