@@ -78,7 +78,7 @@ class SingleImageMetadataTab(QWidget):
         """Create file info group box, search field, and metadata text area."""
         # --- File info group box (image name + scrollable path) ---
         self.file_info_groupbox = QGroupBox()
-        self.file_info_groupbox.setStyleSheet(AppStyles.GroupBox.default() + 
+        self.file_info_groupbox.setStyleSheet(AppStyles.GroupBox.default() +
                                               f"QGroupBox {{ background-color: {AppStyles.Colors.MAIN_BG}; }}")
         self.file_info_groupbox.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
@@ -189,11 +189,11 @@ class SingleImageMetadataTab(QWidget):
         # rebinding the references would destroy a running QThread.
         if self._worker_thread is not None:
             self.status_bar.set_status_bar_message_timed(
-                "Still parsing previous image - please wait.", 3000
+                "Still parsing previous image; please wait.", 3000
             )
             return
         self.processing_active.emit(True)
-        self.status_bar.set_status_bar_message("Parsing image metadata…")
+        self.status_bar.set_status_bar_message("Parsing image metadata...")
 
         # Create worker and thread
         self._worker = MetadataReaderWorker(file_paths)

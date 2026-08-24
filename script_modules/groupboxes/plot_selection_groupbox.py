@@ -37,7 +37,7 @@ class PlotSelectionGroupBox(QGroupBox):
         self._create_widgets()
         # Setup layout
         self._setup_layout()
-    
+
     def _create_widgets(self):
         # Combo boxes
         self.site_combobox = SiteComboBox(parent=self)
@@ -48,7 +48,7 @@ class PlotSelectionGroupBox(QGroupBox):
         self.display_plots_button = DisplayPlotsButton(parent=self)
         self.clear_plots_button = ClearButton(parent=self)
         self.export_plots_button = ExportPlotsButton(parent=self)
-    
+
     def _setup_layout(self):
         # Layouts
         main_layout = QVBoxLayout(self)

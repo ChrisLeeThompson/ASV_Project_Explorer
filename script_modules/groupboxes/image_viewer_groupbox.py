@@ -1006,7 +1006,9 @@ class FullResolutionDialog(QDialog):
         else:
             self._data_range = None
             self.histogram_button.setEnabled(False)
-            self.histogram_button.setToolTip("Grayscale images only")
+            self.histogram_button.setToolTip(
+                AppStyles.AppToolTips.HISTOGRAM_BUTTON_UNAVAILABLE
+            )
         self.ax.set_title(
             self._image_title_text(),
             color=AppStyles.Colors.TEXT_PRIMARY,
@@ -1489,7 +1491,7 @@ class ImageViewerGroupBox(QGroupBox):
         self._nav_detector = ""
         self._nav_composite_key = ""
         self._nav_plot_title = ""
-    
+
     def set_visibility_of_file_name(self, visible: bool):
         """
         Show or hide the file name label.
@@ -1497,7 +1499,7 @@ class ImageViewerGroupBox(QGroupBox):
         :param visible: True to show the file name, False to hide it.
         """
         self.file_name_label.setVisible(visible)
-    
+
     def set_visibility_of_context(self, visible: bool):
         """
         Show or hide the site/step/detector context label.

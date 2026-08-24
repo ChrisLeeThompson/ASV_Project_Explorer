@@ -4,3 +4,17 @@ __pycache__/
 
 # pytest cache
 .pytest_cache/
+
+# Microscopy data. An ASV project dropped in the repo root is easily tens of
+# gigabytes of real experimental data; these patterns keep `git add -A` from
+# staging any of it. Nothing the application ships matches them.
+*.tif
+*.tiff
+ImageLogs/
+ExecutionHistory.json
+Project.AsvProject
+
+# Metadata files this application generates (see ConsolidatedMetadataConfig
+# in config_files/ASVProjectExplorerConfig.json)
+_temp_consolidated_metadata.json
+Consolidated_ASV_Metadata*.json

@@ -177,7 +177,7 @@ class ImageMetadataGroupBox(QGroupBox):
         self._search_row.setVisible(False)
         self.metadata_tree.clear()
         self.metadata_tree.setVisible(False)
-    
+
     def set_visibility_of_file_name(self, visible: bool):
         """
         Show or hide the file name label.
@@ -185,7 +185,7 @@ class ImageMetadataGroupBox(QGroupBox):
         :param visible: True to show the file name, False to hide it.
         """
         self.file_name_label.setVisible(visible)
-    
+
     def set_visibility_of_context(self, visible: bool):
         """
         Show or hide the site/step/detector context label.

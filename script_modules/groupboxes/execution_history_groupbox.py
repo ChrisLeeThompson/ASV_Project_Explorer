@@ -208,7 +208,7 @@ class ExecutionHistoryGroupBox(QGroupBox):
         :param visible: True to show the file name, False to hide it.
         """
         self.file_name_label.setVisible(visible)
-    
+
     def set_visibility_of_context(self, visible: bool):
         """
         Show or hide the site/step/detector context label.

@@ -27,7 +27,7 @@ class DirFileDropLabel(QLabel):
     # Signal emitted when validation fails.
     validation_failed_signal: Signal = Signal(str)
 
-    def __init__(self, color_path, grayscale_path, scale_factor=1.8, 
+    def __init__(self, color_path, grayscale_path, scale_factor=1.8,
                  validation_files: list[str] = None, parent=None):
         super().__init__(parent)
         self.scale_factor: float = scale_factor
@@ -35,11 +35,11 @@ class DirFileDropLabel(QLabel):
         self.setAcceptDrops(True)
         self.color_path = Path(color_path)
         self.grayscale_path = Path(grayscale_path)
-        
+
         # Set default pixmap (grayscale)
         self.pix = QPixmap(str(self.grayscale_path))
         self.setPixmap(self.pix)
-        
+
         # Set default label size based on pixmap size
         self.setScaledContents(True)
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -47,7 +47,7 @@ class DirFileDropLabel(QLabel):
         widget_height = int(self.pix.height() / self.scale_factor)
         self.setFixedSize(widget_width, widget_height)
         self.setMargin(2)
-    
+
     def _validate_directory(self, directory_path: Path) -> tuple[bool, list[str]]:
         """
         Validate that all required files are present in the directory.
@@ -79,7 +79,7 @@ class DirFileDropLabel(QLabel):
         :param state: True or False
         """
         self.setAcceptDrops(state)
-    
+
     def dragEnterEvent(self, event: QDragEnterEvent):
         """
         Handle drag enter events. Accept the drag if it contains:

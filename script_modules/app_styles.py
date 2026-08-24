@@ -100,7 +100,9 @@ def _horizontal_scrollbar(bg_color: str, prefix: str = "") -> str:
 
 
 class StyleColors:
-    
+    """The application palette. Every colour used anywhere in the UI is
+    defined here; widget code must not contain literal hex values."""
+
     MAIN_BG = "#273945"
     GROUPBOX_BG = "#34454f"
     INPUT_BG = "#1f2d36"
@@ -138,6 +140,11 @@ class StyleColors:
     HISTOGRAM_BG               = "#1f2d36"   # plot-area background (behind the trace)
 
 class StyleDimensions:
+    """Sizes, spacings, font sizes, and other numeric layout constants.
+
+    Grouped by the area they affect. Many carry a comment explaining what
+    moves when they are changed, so a value can be retuned without reading
+    the widget that consumes it."""
 
     WINDOW_WIDTH = 1640
     WINDOW_HEIGHT = 1240
@@ -176,6 +183,12 @@ class StyleDimensions:
     PLOT_LINE_WIDTH = 1.0
     PLOT_TITLE_FONT_SIZE = 11
     PLOT_HIGHLIGHT_MARKER_SIZE = 50  # scatter 's' parameter (points²)
+    PLOT_ANNOTATION_FONT_SIZE = 9    # point-tooltip text
+    PLOT_TOOLTIP_OFFSET_PT = 10      # gap between a point and its tooltip box
+    # Grab radius around a plotted point, in display pixels. Tighter than
+    # HISTOGRAM_HIT_RADIUS_PX: that one grabs a full-width level line, this
+    # one a markersize=4 dot (~5px across), so ~2 marker radii of slack.
+    PLOT_HOVER_HIT_RADIUS_PX = 10
     # Image viewer dimensions
     IMAGE_VIEWER_CANVAS_MINIMUM_HEIGHT = 160
     IMAGE_VIEWER_CANVAS_CONTAINER_MAXIMUM_HEIGHT = 200
@@ -225,47 +238,61 @@ class StyleDimensions:
 
 
 class StyleFonts:
+    """Font families referenced by name rather than by stylesheet string."""
 
     FONT_COURIER = "Courier"
 
 
 class ApplicationText:
+    """User-visible strings that are not tied to a single widget.
+
+    Window title, placeholder and empty-state labels, and the startup
+    status message. Keeping them here means the wording can be reviewed in
+    one place rather than hunted through the widget code."""
 
     WINDOW_TITLE = f"ASV Project Explorer {__version__}"
 
-    STARTUP_PLOT_AREA_LABEL = "Drop an ASV project directory or previously generated JSON metadata file\n" + \
-                              "onto Catbug to explore ASV metadata.\n\n" + \
-                              "Alternatively, use the Load ASV Project button or the Load Metadata File button to begin."
-    
+    # Shown in the status bar for STATUS_BAR_STARTUP_TIMEOUT_MS at launch.
+    STATUS_BAR_STARTUP = "Hello!"
+    STATUS_BAR_STARTUP_TIMEOUT_MS = 10000
+
+    STARTUP_PLOT_AREA_LABEL = "Drop an ASV project directory or a previously generated JSON\n" + \
+                              "metadata file onto Catbug to explore ASV metadata.\n\n" + \
+                              "Or use the Load ASV Project or Load Metadata File buttons."
+
     SLICE_DATA_GROUPBOX_DEFAULT_LABEL = "No slice selected."
 
     PROJECT_PARAMETERS_DEFAULT_LABEL = "Load an ASV project to view project parameters."
 
-    PROJECT_PARAMETERS_NO_DATA_LABEL = "No project parameters available in the loaded data."
+    PROJECT_PARAMETERS_NO_DATA_LABEL = "No project parameters in the loaded data."
 
     SINGLE_IMAGE_METADATA_FILE_NAME = ""
-    
-    SINGLE_IMAGE_METADATA_DROP = "Drag and drop a single SEM/FIB .tif or ASV .png image to display its metadata."
+
+    SINGLE_IMAGE_METADATA_DROP = "Drop a single SEM/FIB .tif or ASV .png image here to view its metadata."
 
     TREND_LINE_CHECKBOX = "Trend Line"
 
 
 class ToolTips:
+    """Tooltip strings, consumed as ``AppStyles.AppToolTips.<NAME>``."""
 
     EXPORT_PLOTS_BUTTON = "Export all displayed plots as PNG, SVG, and CSV."
 
     FULL_RESOLUTION_BUTTON = "Open the image at full resolution with zoom and pan controls."
 
-    DELETE_TEMP_METADATA_BUTTON =  "Delete the auto generated temporary metadata file and directory. Only available for auto-generated metadata files."
+    DELETE_TEMP_METADATA_BUTTON = "Delete the temporary metadata file and its directory. Only available for auto-generated files, not ones you saved."
+
+    HISTOGRAM_BUTTON_UNAVAILABLE = "Available for grayscale images only."
 
     PROJECT_NAME_BUTTON = "Open the project directory."
 
-    IMAGE_NAME_LINK = "Open containing directory."
+    IMAGE_NAME_LINK = "Open the containing directory."
 
-    TREND_LINE_CHECKBOX = "Show/hide the trend line and statistics overlay (average + slope / R², or average cycle time)."
+    TREND_LINE_CHECKBOX = "Show or hide the trend line and statistics overlay (average, slope, and R²; or average cycle time)."
 
 
 class WindowStyles:
+    """Stylesheets for the main window and its tab bar."""
 
     @staticmethod
     def window() -> str:
@@ -274,7 +301,7 @@ class WindowStyles:
                 background-color: {StyleColors.MAIN_BG}
             }}
         """
-    
+
     @staticmethod
     def tabs() -> str:
         return f"""
@@ -301,6 +328,7 @@ class WindowStyles:
 
 
 class LabelStyles:
+    """Stylesheets for QLabel, by role (default, large, status bar)."""
 
     @staticmethod
     def default() -> str:
@@ -337,7 +365,7 @@ class LabelStyles:
                 font-size: {StyleDimensions.FONT_SIZE_LARGE};
             }}
         """
-    
+
     @staticmethod
     def status_bar() -> str:
         return f"""
@@ -375,6 +403,11 @@ class LabelStyles:
 
 
 class GroupBoxStyles:
+    """Stylesheets for QGroupBox, by role.
+
+    ``default`` and ``with_title`` cover most panels; the remainder are
+    per-area variants where the standard frame or title placement does not
+    suit the content."""
 
     @staticmethod
     def default() -> str:
@@ -422,7 +455,7 @@ class GroupBoxStyles:
                 background-color: {StyleColors.GROUPBOX_BG};
             }}
         """
-    
+
     @staticmethod
     def with_title_flush() -> str:
         """Titled groupbox for use inside a splitter.
@@ -521,7 +554,7 @@ class GroupBoxStyles:
                 padding-bottom: {StyleDimensions.PADDING};
             }}
         """
-    
+
     @staticmethod
     def plot_area_flush() -> str:
         """Plot area groupbox for the right side of a splitter.
@@ -641,7 +674,7 @@ class GroupBoxStyles:
                 padding: 0px;
             }}
         """
-    
+
     @staticmethod
     def site_params_with_title() -> str:
         return f"""
@@ -673,6 +706,7 @@ class GroupBoxStyles:
 
 
 class ButtonStyles:
+    """Stylesheets for QPushButton, by role."""
 
     @staticmethod
     def default() -> str:
@@ -708,7 +742,7 @@ class ButtonStyles:
                 font-size: {StyleDimensions.FONT_SIZE_LARGE};
             }}
         """
-    
+
     @staticmethod
     def toggle() -> str:
         """Checkable button: the checked state carries the active-plot
@@ -808,6 +842,7 @@ class ButtonStyles:
 
 
 class SpinBoxStyles:
+    """Stylesheets for QSpinBox and QDoubleSpinBox."""
 
     @staticmethod
     def default() -> str:
@@ -836,6 +871,7 @@ class SpinBoxStyles:
 
 
 class CheckBoxStyles:
+    """Stylesheets for QCheckBox, including the indicator artwork."""
 
     @staticmethod
     def default() -> str:
@@ -880,6 +916,8 @@ class CheckBoxStyles:
 
 
 class ComboBoxStyles:
+    """Stylesheets for QComboBox — the plain control, the checkable
+    multi-select variant, and the popup context menu."""
 
     # Arrow icon path
     _arrow_path = str(ASSETS_DIR / "down_arrow_white.svg").replace("\\", "/")
@@ -1011,7 +1049,7 @@ class ComboBoxStyles:
             /* Dropdown Scrollbar */
             {_vertical_scrollbar(StyleColors.INPUT_BG, "QComboBox QAbstractItemView ")}
         """
-    
+
     @staticmethod
     def context_menu() -> str:
         return f"""
@@ -1041,6 +1079,7 @@ class ComboBoxStyles:
 
 
 class ScrollAreaStyles:
+    """Stylesheets for QScrollArea and its scroll bars."""
 
     @staticmethod
     def default() -> str:
@@ -1104,6 +1143,7 @@ class ScrollAreaStyles:
 
 
 class ProgressBarStyles:
+    """Stylesheet for the status-bar QProgressBar."""
 
     @staticmethod
     def default() -> str:
@@ -1126,6 +1166,7 @@ class ProgressBarStyles:
 
 
 class LineEditStyles:
+    """Stylesheets for QLineEdit, by role (default, search field)."""
 
     @staticmethod
     def line_edit() -> str:
@@ -1165,6 +1206,7 @@ class LineEditStyles:
 
 
 class StatusBarStyles:
+    """Stylesheet for the application status bar."""
 
     @staticmethod
     def default() -> str:
@@ -1182,6 +1224,7 @@ class StatusBarStyles:
 
 
 class TreeWidgetStyles:
+    """Stylesheets for the QTreeWidget metadata and parameter trees."""
 
     # Down arrow icon path
     _down_arrow_path = str(ASSETS_DIR / "filled_down_arrow_white.svg").replace("\\", "/")
@@ -1348,6 +1391,12 @@ class ToolBarStyles:
 
 
 class AppStyles:
+    """The single entry point widget code imports.
+
+    Aliases every style class above onto short names
+    (``AppStyles.Colors``, ``AppStyles.Button``, ...) so widgets depend on
+    this one symbol rather than on the individual classes, and adds the
+    helpers that need to touch live widgets."""
 
     Colors = StyleColors
     Dimensions = StyleDimensions

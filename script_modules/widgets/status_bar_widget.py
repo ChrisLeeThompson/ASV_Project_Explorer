@@ -44,10 +44,10 @@ class StatusBarWidget(QStatusBar):
         # Set styles
         self.status_bar_label.setStyleSheet(AppStyles.Label.status_bar())
         self.progress_bar.setStyleSheet(AppStyles.ProgressBar.default())
-    
+
     def _connect_widgets(self):
         self.cancel_button.clicked.connect(self.cancel_button_clicked_signal.emit)
-    
+
     def _setup_layout(self):
         self.addWidget(self.status_bar_label, 3)
         self.addWidget(self.progress_bar, 2)
@@ -56,12 +56,15 @@ class StatusBarWidget(QStatusBar):
         self.addPermanentWidget(spacer, 1)
         self.addPermanentWidget(self.cancel_button)
         self.setStyleSheet(AppStyles.StatusBar.default())
-    
+
     def _set_initial_state(self):
-        self.set_status_bar_message_timed("Hello!", 10000)
+        self.set_status_bar_message_timed(
+            AppStyles.AppText.STATUS_BAR_STARTUP,
+            AppStyles.AppText.STATUS_BAR_STARTUP_TIMEOUT_MS,
+        )
         self.set_progress_bar_visible(False)
         self.set_cancel_button_visible(False)
-    
+
     @Slot(str)
     def set_status_bar_message(self, message: str):
         """Set the status bar QLabel text."""
@@ -69,32 +72,32 @@ class StatusBarWidget(QStatusBar):
         # cannot blank this persistent message later.
         self._message_timer.stop()
         self.status_bar_label.setText(message)
-    
+
     @Slot(str, int)
     def set_status_bar_message_timed(self, message: str, timeout: int):
         """Set the status bar QLabel text with a timeout."""
         self._message_timer.stop()
         self.status_bar_label.setText(message)
         self._message_timer.start(timeout)
-    
+
     def _clear_status_bar_message(self):
         self.status_bar_label.setText("")
-    
+
     @Slot(bool)
     def set_progress_bar_visible(self, visible: bool):
         """Set the progress bar visibility."""
         self.progress_bar.setVisible(visible)
-    
+
     @Slot(bool)
     def set_cancel_button_visible(self, visible: bool):
         """Set the Cancel button visibility."""
         self.cancel_button.setVisible(visible)
-    
+
     @Slot(int, int)
     def set_progress_bar_range(self, minimum: int, maximum: int):
         """Set the progress bar range."""
         self.progress_bar.setRange(minimum, maximum)
-    
+
     @Slot(int)
     def set_progress_bar_value(self, value: int):
         """Set the progress bar value."""

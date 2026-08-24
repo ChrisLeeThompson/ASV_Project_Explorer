@@ -32,7 +32,7 @@ class SliceIndexRangeGroupBox(QGroupBox):
         self._setup_layout()
         # Connect signals
         self._connect_signals()
-    
+
     def _create_widgets(self):
         # Create widgets
         self.slice_index_start_label = QLabel("Start")
@@ -44,7 +44,7 @@ class SliceIndexRangeGroupBox(QGroupBox):
         # Set styles
         self.slice_index_start_label.setStyleSheet(AppStyles.Label.default())
         self.slice_index_end_label.setStyleSheet(AppStyles.Label.default())
-    
+
     def _setup_layout(self):
         main_layout = QGridLayout(self)
         main_layout.addWidget(self.slice_index_start_label, 0, 0, alignment=Qt.AlignmentFlag.AlignLeft)

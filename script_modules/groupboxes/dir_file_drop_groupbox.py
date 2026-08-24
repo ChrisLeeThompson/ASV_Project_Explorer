@@ -31,7 +31,7 @@ class DirFileDropGroupBox(QGroupBox):
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Fixed
         )
-    
+
     def _create_widgets(self):
         self.dir_file_drop_widget = DirFileDropLabel(
             color_path=self._color_path,
@@ -40,7 +40,7 @@ class DirFileDropGroupBox(QGroupBox):
             validation_files=self.validation_files,
             parent=self
         )
-    
+
     def _setup_layout(self):
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.dir_file_drop_widget, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -52,4 +52,3 @@ class DirFileDropGroupBox(QGroupBox):
         )
         self.setLayout(main_layout)
         self.setStyleSheet(AppStyles.GroupBox.default())
-        

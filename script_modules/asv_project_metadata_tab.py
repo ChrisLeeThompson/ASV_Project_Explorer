@@ -1519,7 +1519,7 @@ class ASVProjectMetadataTab(QWidget):
             )
         else:
             self.status_bar.set_status_bar_message_timed(
-                "No data found for selected plots in the current slice range.",
+                "No data for the selected plots in the current slice range.",
                 5000
             )
 

@@ -6,7 +6,10 @@ Includes:
 - StyledComboBox: Base styled combo box with placeholder text and eliding.
 - CheckableComboBox: Multi-select combo box with checkboxes for each item.
 - SiteComboBox, StepNameComboBox, DetectorComboBox: Single-select combo boxes.
-- PlotTypeComboBox: Multi-select combo box for selecting plot types.
+- SelectPlotsComboBox: Multi-select combo box for choosing plot fields.
+
+The leaf classes at the bottom differ from their bases only by placeholder
+text; the behaviour lives in StyledComboBox and CheckableComboBox.
 """
 from PySide6.QtWidgets import QComboBox, QStyledItemDelegate, QMenu
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QColor
@@ -38,6 +41,13 @@ class CurrentItemDelegate(QStyledItemDelegate):
         self._bar_color = QColor(AppStyles.Colors.COMBO_CURRENT_ITEM_BG)
 
     def paint(self, painter, option, index):
+        """Draw the row normally, then overlay the bar on the current one.
+
+        :param painter: Active QPainter for the popup view.
+        :param option: Style option carrying the row rect and layout
+            direction.
+        :param index: Model index of the row being painted.
+        """
         super().paint(painter, option, index)
         if index.row() != self._combo.currentIndex():
             return
@@ -199,7 +209,7 @@ class CheckableComboBox(QComboBox):
         else:
             self.lineEdit().clear()  # Shows placeholder
         self.selection_changed.emit(checked)
-    
+
     def _toggle_item(self, index):
         """Toggle checkbox when clicking anywhere on the item row."""
         item = self._model.itemFromIndex(index)

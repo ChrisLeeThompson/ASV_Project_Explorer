@@ -181,6 +181,10 @@ class CollapsibleSplitterHandle(QSplitterHandle):
     # -----------------------------------------------------------------
 
     def mousePressEvent(self, event):                  # noqa: N802
+        """Record the press position and take over the drag from Qt.
+
+        :param event: Qt mouse press event.
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             self._press_pos = event.position().toPoint()
             self._dragged = False
@@ -194,6 +198,13 @@ class CollapsibleSplitterHandle(QSplitterHandle):
             super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):                   # noqa: N802
+        """Resize the splitter once the drag threshold is crossed.
+
+        Motion below the threshold is left alone so the gesture can still
+        resolve as a click on release.
+
+        :param event: Qt mouse move event.
+        """
         if self._press_pos is not None:
             if not self._dragged:
                 delta = (
@@ -212,6 +223,10 @@ class CollapsibleSplitterHandle(QSplitterHandle):
             super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):                # noqa: N802
+        """Toggle the adjacent panel if the gesture was a click, not a drag.
+
+        :param event: Qt mouse release event.
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             was_click = not self._dragged and self._press_pos is not None
             self._pressed = False
@@ -232,11 +247,18 @@ class CollapsibleSplitterHandle(QSplitterHandle):
     # -----------------------------------------------------------------
 
     def enterEvent(self, event):                       # noqa: N802
+        """Repaint in the hovered state."""
         self._hovered = True
         self.update()
         super().enterEvent(event)
 
     def leaveEvent(self, event):                       # noqa: N802
+        """Repaint unhovered, and drop the pressed look.
+
+        The pressed flag is cleared here as well because the cursor can
+        leave the handle while the button is still down; without this the
+        handle would stay visually pressed until the next click.
+        """
         self._hovered = False
         self._pressed = False
         self.update()
@@ -312,6 +334,8 @@ class CollapsibleSplitter(QSplitter):
         self._click_collapsible.add(index)
 
     def is_click_collapsible(self, index: int) -> bool:
+        """Whether the child at ``index`` was registered as
+        click-collapsible via :meth:`set_click_collapsible`."""
         return index in self._click_collapsible
 
     def set_preferred_size(self, index: int, width: int):
@@ -325,6 +349,12 @@ class CollapsibleSplitter(QSplitter):
         return self.is_panel_expanded(0)
 
     def is_panel_expanded(self, index: int) -> bool:
+        """Whether the panel at ``index`` currently has a non-zero width.
+
+        Collapsing sets a panel's splitter size to 0 rather than hiding
+        the widget, so size is the authoritative test. An out-of-range
+        index reports False.
+        """
         sizes = self.sizes()
         return 0 <= index < len(sizes) and sizes[index] > 0
 
@@ -531,9 +561,20 @@ class CollapsiblePanelHandle(QWidget):
         return self._expanded
 
     def set_target(self, target: QWidget):
+        """Set the widget this handle shows and hides.
+
+        :param target: The panel widget, or None to detach.
+        """
         self._target = target
 
     def set_expanded(self, expanded: bool):
+        """Show or hide the target panel and emit ``toggled``.
+
+        A no-op when already in the requested state, so callers can use
+        it to assert a state without emitting a spurious signal.
+
+        :param expanded: True to show the target, False to hide it.
+        """
         if expanded != self._expanded:
             self._expanded = expanded
             if self._target is not None:
@@ -546,22 +587,34 @@ class CollapsiblePanelHandle(QWidget):
     # -----------------------------------------------------------------
 
     def mousePressEvent(self, event):
+        """Toggle the target panel on a left click.
+
+        Unlike CollapsibleSplitterHandle this handle does not resize
+        anything, so there is no drag to distinguish and the press acts
+        immediately.
+
+        :param event: Qt mouse press event.
+        """
         if event.button() == Qt.MouseButton.LeftButton:
             self.set_expanded(not self._expanded)
         else:
             super().mousePressEvent(event)
 
     def enterEvent(self, event):
+        """Repaint in the hovered state."""
         self._hovered = True
         self.update()
         super().enterEvent(event)
 
     def leaveEvent(self, event):
+        """Repaint in the unhovered state."""
         self._hovered = False
         self.update()
         super().leaveEvent(event)
 
     def paintEvent(self, event):
+        """Draw the handle background and a chevron pointing the way the
+        panel will move when clicked."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
