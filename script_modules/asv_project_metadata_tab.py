@@ -48,6 +48,7 @@ from script_modules.metadata_query import (
     get_unique_detectors,
     filter_images_by_detector,
     get_available_plot_fields,
+    get_execution_history_by_slice,
     get_slice_indices,
     extract_plot_data,
     detect_unit_suffix,
@@ -1486,9 +1487,11 @@ class ASVProjectMetadataTab(QWidget):
                 cancelled = True
                 break
 
-        # Hide progress bar and cancel button after rendering
+        # Hide progress bar and cancel button after rendering; forget
+        # the "Rendering plots (N/N)..." base message
         self.status_bar.set_progress_bar_visible(False)
         self.status_bar.set_cancel_button_visible(False)
+        self.status_bar.clear_base_message()
 
         if cancelled:
             logger.info(
@@ -1623,10 +1626,14 @@ class ASVProjectMetadataTab(QWidget):
             default_browse_dir=browse_dir,
             parent_widget=self,
             progress_callback=on_progress,
+            execution_history_lookup=lambda site, step:
+                get_execution_history_by_slice(self._metadata, site, step),
         )
 
-        # Hide progress bar
+        # Hide progress bar; forget the "Exporting plots (N/N)..."
+        # base message
         self.status_bar.set_progress_bar_visible(False)
+        self.status_bar.clear_base_message()
 
         if result.export_dir is not None:
             if result.ok_count == total:
@@ -2559,6 +2566,10 @@ class ASVProjectMetadataTab(QWidget):
         # Hide progress bar and cancel button
         self.status_bar.set_progress_bar_visible(False)
         self.status_bar.set_cancel_button_visible(False)
+        # Forget the last worker phase message so it cannot resurface
+        # when a later timed message expires (the worker's timed
+        # completed/cancelled message stays visible until its timeout)
+        self.status_bar.clear_base_message()
         # Re-enable drops
         self.dir_file_drop_groupbox.dir_file_drop_widget.set_accepts_drops(True)
         # Re-enable load buttons

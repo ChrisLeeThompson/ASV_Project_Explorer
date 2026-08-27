@@ -480,3 +480,186 @@ def resolve_metadata_path(image: dict, path: str):
         else:
             return None
     return current
+
+
+# =========================================================================
+# Execution History Export
+# =========================================================================
+
+# Fixed lead columns of the execution-history CSV; activity data
+# columns follow in order of first appearance.
+_EXEC_HISTORY_LEAD_COLUMNS = [
+    "Slice Index", "Step", "Activity", "Order", "Status", "Message",
+    "Started At", "Duration (s)", "Duration",
+]
+
+
+def get_execution_history_by_slice(
+    metadata: dict, site_name: str, step_name: str
+) -> dict[int, dict]:
+    """
+    Collect the execution history of every slice in a site/step.
+
+    Execution history is attached per slice, so images of the same
+    slice (across detectors) carry identical dicts — duplicates
+    collapse naturally in the mapping.
+
+    :param metadata: The consolidated metadata dictionary.
+    :param site_name: The site's SiteName.
+    :param step_name: The step's StepName.
+    :return: Dict of slice index -> ExecutionHistory dict (keyed by
+        recipe name). Empty when the site/step is absent or no image
+        carries execution history.
+    """
+    for site in metadata.get("Sites", []):
+        if site.get("SiteName") != site_name:
+            continue
+        for step in site.get("Steps", []):
+            if step.get("StepName") != step_name:
+                continue
+            result = {}
+            for image in step.get("Images", []):
+                slice_idx = image.get("FileNameSliceIndex")
+                exec_history = image.get("ExecutionHistory")
+                if slice_idx is None or not exec_history:
+                    continue
+                try:
+                    result[int(slice_idx)] = exec_history
+                except (ValueError, TypeError):
+                    continue
+            return result
+    return {}
+
+
+def build_execution_history_rows(
+    eh_by_slice: dict[int, dict],
+) -> tuple[list[str], list[list]]:
+    """
+    Flatten per-slice execution history into CSV headers and rows.
+
+    Long layout: one row per executed activity, sorted by slice index
+    and then execution order. Lead columns are fixed
+    (``_EXEC_HISTORY_LEAD_COLUMNS``); activity result data columns
+    (flattened ``Data`` keys, dotted for nesting) follow in order of
+    first appearance. ``SharpnessData`` curves are excluded — the
+    per-point sharpness lists belong in the sharpness dialog, not a
+    per-slice summary table.
+
+    :param eh_by_slice: Dict of slice index -> ExecutionHistory dict.
+    :return: (headers, rows) tuple, or ``([], [])`` when there are no
+        activities.
+    """
+    data_columns: list[str] = []
+    entries = []  # (slice_idx, order, activity_row_dict)
+
+    for slice_idx in sorted(eh_by_slice):
+        recipes = eh_by_slice[slice_idx]
+        if not isinstance(recipes, dict):
+            continue
+        for recipe_name, activities in recipes.items():
+            if not isinstance(activities, dict):
+                continue
+            for activity_name, activity in activities.items():
+                if not isinstance(activity, dict):
+                    continue
+                flat_data = {}
+                _flatten_activity_data(
+                    activity.get("Data"), flat_data
+                )
+                for key in flat_data:
+                    if key not in data_columns:
+                        data_columns.append(key)
+                order = activity.get("ExecutionOrder", "")
+                entries.append((slice_idx, order, {
+                    "Slice Index": slice_idx,
+                    "Step": recipe_name,
+                    "Activity": activity_name,
+                    "Order": order,
+                    "Status": activity.get("Status", ""),
+                    "Message": activity.get("Message", ""),
+                    "Started At": _format_export_timestamp(
+                        activity.get("StartedAt")
+                    ),
+                    "Duration (s)": _duration_seconds(
+                        activity.get("StartedAt"),
+                        activity.get("FinishedAt"),
+                    ),
+                    "Duration": activity.get("CalculatedDuration", ""),
+                    **flat_data,
+                }))
+
+    if not entries:
+        return [], []
+
+    entries.sort(key=lambda e: (e[0], e[1] if isinstance(e[1], int) else 0))
+    headers = _EXEC_HISTORY_LEAD_COLUMNS + data_columns
+    rows = [
+        [row.get(column, "") for column in headers]
+        for _, _, row in entries
+    ]
+    return headers, rows
+
+
+def _flatten_activity_data(data, out: dict, prefix: str = ""):
+    """
+    Flatten an activity ``Data`` dict into dotted-key/value pairs.
+
+    Skips the ``SharpnessData`` curve list; other lists are left
+    as-is (none are produced by the current extraction config).
+
+    :param data: The activity's Data dict (or None).
+    :param out: Dict the flattened pairs are added to.
+    :param prefix: Dotted key prefix for nested dicts.
+    """
+    if not isinstance(data, dict):
+        return
+    for key, value in data.items():
+        if key == "SharpnessData":
+            continue
+        if isinstance(value, dict):
+            _flatten_activity_data(value, out, f"{prefix}{key}.")
+        else:
+            out[f"{prefix}{key}"] = value
+
+
+def _format_export_timestamp(timestamp) -> str:
+    """
+    Format an ISO timestamp as ``YYYY-MM-DD HH:MM:SS`` for the CSV.
+
+    Runs span multiple days, so the date matters. Returns the raw
+    value as a string when it cannot be parsed, and "" for None/empty.
+
+    :param timestamp: ISO format timestamp string, or None.
+    :return: Excel-friendly timestamp string.
+    """
+    if not timestamp:
+        return ""
+    try:
+        return datetime.fromisoformat(timestamp).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
+    except (ValueError, TypeError):
+        return str(timestamp)
+
+
+def _duration_seconds(started_at, finished_at):
+    """
+    Compute a numeric duration in seconds between two ISO timestamps.
+
+    :param started_at: ISO format start timestamp, or None.
+    :param finished_at: ISO format end timestamp, or None.
+    :return: Duration rounded to 1 decimal, or "" when either
+        timestamp is missing or unparsable, or the span is negative.
+    """
+    if not started_at or not finished_at:
+        return ""
+    try:
+        delta = (
+            datetime.fromisoformat(finished_at)
+            - datetime.fromisoformat(started_at)
+        ).total_seconds()
+    except (ValueError, TypeError):
+        return ""
+    if delta < 0:
+        return ""
+    return round(delta, 1)

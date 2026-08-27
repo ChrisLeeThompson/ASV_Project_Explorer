@@ -7,10 +7,16 @@ Each plot is exported as:
 - SVG (vector graphic)
 - CSV (tabular data: Slice Index, value column, Image Name)
 
+When an ``execution_history_lookup`` is provided, one execution-history
+CSV per unique site/step among the exported plots is written at the
+export root (every plot of the same step shares identical execution
+history, so the file is step-level rather than per-plot).
+
 Directory structure::
 
     <user-chosen-directory>/
     └── Exported_Plots_YYYYMMDD_HHMMSS/
+        ├── SiteName_StepName_ExecutionHistory.csv
         ├── SiteName_StepName_Detector_FieldLabel/
         │   ├── FieldLabel.png
         │   ├── FieldLabel.svg
@@ -27,6 +33,7 @@ from datetime import datetime
 from pathlib import Path
 from PySide6.QtWidgets import QFileDialog, QWidget
 from script_modules.app_styles import AppStyles
+from script_modules.metadata_query import build_execution_history_rows
 
 
 logger = logging.getLogger(__name__)
@@ -132,6 +139,73 @@ def _write_csv(
             writer.writerow([idx, val, name])
 
 
+def _write_execution_history_csv(
+    filepath: Path, headers: list, rows: list
+):
+    """
+    Write flattened execution-history rows to a CSV file.
+
+    :param filepath: Destination CSV path.
+    :param headers: Column header strings.
+    :param rows: Row value lists aligned with the headers.
+    """
+    with open(filepath, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        writer.writerows(rows)
+
+
+def _export_execution_histories(
+    plot_widgets: dict, export_dir: Path, execution_history_lookup
+):
+    """
+    Write one execution-history CSV per unique site/step among the
+    plots, at the export root.
+
+    Failures are isolated per site/step: a CSV that cannot be built
+    or written is logged and skipped without affecting the plot
+    export.
+
+    :param plot_widgets: Dict of {composite_key: ASVPlotWidget}.
+    :param export_dir: The timestamped export directory.
+    :param execution_history_lookup: Callable(site_name, step_name)
+        returning a {slice_index: execution_history} dict.
+    """
+    contexts = []
+    for plot_widget in plot_widgets.values():
+        context = (plot_widget._site_name, plot_widget._step_name)
+        if context not in contexts:
+            contexts.append(context)
+
+    seen_names: dict[str, int] = {}
+    for site_name, step_name in contexts:
+        try:
+            eh_by_slice = execution_history_lookup(site_name, step_name)
+            if not eh_by_slice:
+                logger.warning(
+                    "No execution history for: %s | %s",
+                    site_name, step_name
+                )
+                continue
+            headers, rows = build_execution_history_rows(eh_by_slice)
+            if not rows:
+                continue
+            file_name = sanitize_filename(f"{site_name}_{step_name}")
+            if file_name in seen_names:
+                seen_names[file_name] += 1
+                file_name = f"{file_name}_{seen_names[file_name]}"
+            else:
+                seen_names[file_name] = 0
+            csv_path = export_dir / f"{file_name}_ExecutionHistory.csv"
+            _write_execution_history_csv(csv_path, headers, rows)
+            logger.debug("Saved: %s", csv_path.name)
+        except Exception:
+            logger.warning(
+                "Failed to export execution history for: %s | %s",
+                site_name, step_name, exc_info=True
+            )
+
+
 def _save_figure(plot_widget, directory: Path, file_stem: str):
     """
     Save the plot figure as PNG and SVG files.
@@ -187,6 +261,7 @@ def export_all_plots(
     default_browse_dir: str,
     parent_widget: QWidget | None = None,
     progress_callback=None,
+    execution_history_lookup=None,
 ) -> ExportResult:
     """
     Export all displayed plots to a user-selected directory.
@@ -204,6 +279,11 @@ def export_all_plots(
     :param parent_widget: Parent widget for the dialog (for modality).
     :param progress_callback: Optional callable(current, total) for
         progress updates.
+    :param execution_history_lookup: Optional callable(site_name,
+        step_name) returning a {slice_index: execution_history} dict;
+        when provided, one execution-history CSV per unique site/step
+        is written at the export root. Execution-history failures are
+        logged and do not affect the per-plot result.
     :return: ExportResult(export_dir, ok_count, error).
         ExportResult(None, 0, None) if the user cancelled the dialog
         (or there was nothing to export); ExportResult(None, 0, message)
@@ -238,6 +318,12 @@ def export_all_plots(
         )
         return ExportResult(
             None, 0, f"Could not create export directory: {export_dir}"
+        )
+
+    # --- Execution-history CSVs (one per unique site/step) ---
+    if execution_history_lookup is not None:
+        _export_execution_histories(
+            plot_widgets, export_dir, execution_history_lookup
         )
 
     # --- Export each plot ---

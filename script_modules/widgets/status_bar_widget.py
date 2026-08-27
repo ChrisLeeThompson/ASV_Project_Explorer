@@ -7,6 +7,13 @@ The status bar includes:
 - A QProgressBar to show progress during parsing and loading operations.
 - A Stop button during parsing/loading that allows the user to cancel the operation.
 
+Message contract: a persistent message (``set_status_bar_message``)
+becomes the base message. A timed message overlays it and, when its
+timeout expires, the base message is restored — so click feedback shown
+during a long operation (e.g. "Parsing in progress; please wait.")
+gives way to the operation's own message instead of leaving the bar
+blank. Call ``clear_base_message`` when an operation ends so its final
+base message cannot resurface after a later timed message expires.
 """
 from PySide6.QtWidgets import (
     QStatusBar, QLabel, QProgressBar,
@@ -27,6 +34,8 @@ class StatusBarWidget(QStatusBar):
         self._message_timer = QTimer(self)
         self._message_timer.setSingleShot(True)
         self._message_timer.timeout.connect(self._clear_status_bar_message)
+        # Last persistent message; restored when a timed message expires.
+        self._base_message = ""
         # Create widgets
         self._create_widgets()
         # Setup connections
@@ -67,21 +76,35 @@ class StatusBarWidget(QStatusBar):
 
     @Slot(str)
     def set_status_bar_message(self, message: str):
-        """Set the status bar QLabel text."""
+        """Set the status bar QLabel text and record it as the base
+        message that timed messages revert to."""
         # Stop any pending timed-message timeout so a stale timeout
         # cannot blank this persistent message later.
         self._message_timer.stop()
+        self._base_message = message
         self.status_bar_label.setText(message)
 
     @Slot(str, int)
     def set_status_bar_message_timed(self, message: str, timeout: int):
-        """Set the status bar QLabel text with a timeout."""
+        """Overlay the status bar QLabel with a message that reverts
+        to the base message after the timeout."""
         self._message_timer.stop()
         self.status_bar_label.setText(message)
         self._message_timer.start(timeout)
 
+    def clear_base_message(self):
+        """Mark the current operation as over: forget the base message.
+
+        A timed message that is still displayed keeps showing and
+        expires to the now-empty base; with no timed message active
+        the label is blanked immediately.
+        """
+        self._base_message = ""
+        if not self._message_timer.isActive():
+            self.status_bar_label.setText("")
+
     def _clear_status_bar_message(self):
-        self.status_bar_label.setText("")
+        self.status_bar_label.setText(self._base_message)
 
     @Slot(bool)
     def set_progress_bar_visible(self, visible: bool):

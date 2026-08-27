@@ -25,8 +25,8 @@ Thank you,
 Chris Thompson
 .
 Copyright (c) 2026 Christopher Thompson.
-Released under the MIT License -- see the LICENSE file, which also explains why the Catbug artwork in
-script_assets/ is NOT covered by that license.
+Released under the MIT License -- see the LICENSE file, which also lists the three Catbug images in
+script_assets/ that are not covered by that license.
 """
 
 import logging

@@ -235,7 +235,10 @@ class SingleImageMetadataTab(QWidget):
     def _on_finished(self):
         """Clean up worker and re-enable tabs."""
         self._cleanup_worker()
-        self.status_bar.set_status_bar_message("")
+        # Base-only clear: on success the "Parsing image metadata..."
+        # label blanks now; after an error the timed error message from
+        # _on_error keeps showing until its own timeout.
+        self.status_bar.clear_base_message()
         self.processing_active.emit(False)
 
     def _cleanup_worker(self):

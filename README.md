@@ -32,8 +32,9 @@ The application also runs from AutoScript Runner.
 **ASV Project Metadata** — load a project directory (or a previously
 generated metadata JSON file), then plot metadata fields against slice index.
 Clicking a plot point selects that slice and shows its image, image metadata,
-and slice execution history. Plots can be exported as PNG, SVG, and CSV.
-Auto-update watches the project folder and refreshes as new slices arrive.
+and slice execution history. Plots can be exported as PNG, SVG, and CSV,
+along with one execution-history CSV per imaging step. Auto-update watches
+the project folder and refreshes as new slices arrive.
 
 **Single Image Metadata** — drop a single SEM/FIB `.tif` or ASV `.png` image
 to view and search its raw metadata.

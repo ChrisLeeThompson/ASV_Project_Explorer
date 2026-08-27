@@ -18,6 +18,12 @@ The ExecutionHistory.json hierarchy:
                             └── ActivityIterationExecutionHistory
                                 └── ActivityExecutionHistory  <- target
 
+Activities whose Result node is a ``SkippedResult`` are dropped: ASV
+writes these placeholders for dynamic autofunctions (EveryN schedules)
+that were evaluated but not executed on a slice, and stamps them with
+Status "Finished" even though nothing ran. The result-type names that
+mark such placeholders come from ``SkippedResultTypes`` in the config.
+
 The parser returns structured data keyed by site name and slice index,
 allowing the consolidation logic to merge execution history into each
 image based on its FileNameSliceIndex.
@@ -93,6 +99,8 @@ def parse_execution_history(
     common_fields_config = config.get("CommonFields", {})
     common_fields = common_fields_config.get("Fields", [])
     activity_types = config.get("ActivityTypes", {})
+    skipped_config = config.get("SkippedResultTypes", {})
+    skipped_result_types = skipped_config.get("Types", ["SkippedResult"])
 
     # Find all RunExecutionHistory nodes (the actual ASV runs)
     run_type = traversal_types.get("RunLevel", "RunExecutionHistory")
@@ -117,6 +125,7 @@ def parse_execution_history(
             traversal_types=traversal_types,
             common_fields=common_fields,
             activity_types=activity_types,
+            skipped_result_types=skipped_result_types,
         )
         # Merge run data into result (later runs overwrite earlier ones
         # for the same site/slice, which is the expected behavior for
@@ -166,6 +175,7 @@ def _process_run(
     traversal_types: dict,
     common_fields: list[str],
     activity_types: dict,
+    skipped_result_types: list[str],
 ) -> dict:
     """
     Process a single RunExecutionHistory node.
@@ -174,6 +184,8 @@ def _process_run(
     :param traversal_types: TraversalTypes config section.
     :param common_fields: List of common field paths to extract.
     :param activity_types: ActivityTypes config section.
+    :param skipped_result_types: Result ``$type`` short names marking
+        activities that were scheduled but not executed.
     :return: Dict keyed by site name -> slice index -> recipe -> activity.
     """
     site_type = traversal_types.get("SiteLevel", "SiteExecutionHistory")
@@ -187,6 +199,7 @@ def _process_run(
             traversal_types=traversal_types,
             common_fields=common_fields,
             activity_types=activity_types,
+            skipped_result_types=skipped_result_types,
         )
         if site_data:
             result[site_name] = site_data
@@ -199,6 +212,7 @@ def _process_site(
     traversal_types: dict,
     common_fields: list[str],
     activity_types: dict,
+    skipped_result_types: list[str],
 ) -> dict:
     """
     Process a single SiteExecutionHistory node.
@@ -207,6 +221,8 @@ def _process_site(
     :param traversal_types: TraversalTypes config section.
     :param common_fields: List of common field paths to extract.
     :param activity_types: ActivityTypes config section.
+    :param skipped_result_types: Result ``$type`` short names marking
+        activities that were scheduled but not executed.
     :return: Dict keyed by slice index (int) -> recipe -> activity.
     """
     slice_type = traversal_types.get(
@@ -232,6 +248,7 @@ def _process_site(
             traversal_types=traversal_types,
             common_fields=common_fields,
             activity_types=activity_types,
+            skipped_result_types=skipped_result_types,
         )
         if slice_data:
             result[slice_index] = slice_data
@@ -244,6 +261,7 @@ def _process_slice(
     traversal_types: dict,
     common_fields: list[str],
     activity_types: dict,
+    skipped_result_types: list[str],
 ) -> dict:
     """
     Process a single SliceExecutionHistory node.
@@ -252,6 +270,8 @@ def _process_slice(
     :param traversal_types: TraversalTypes config section.
     :param common_fields: List of common field paths to extract.
     :param activity_types: ActivityTypes config section.
+    :param skipped_result_types: Result ``$type`` short names marking
+        activities that were scheduled but not executed.
     :return: Dict keyed by recipe name -> activity name -> activity data.
     """
     recipe_type = traversal_types.get(
@@ -267,6 +287,7 @@ def _process_slice(
             traversal_types=traversal_types,
             common_fields=common_fields,
             activity_types=activity_types,
+            skipped_result_types=skipped_result_types,
         )
         if activities:
             result[recipe_name] = activities
@@ -279,6 +300,7 @@ def _process_recipe(
     traversal_types: dict,
     common_fields: list[str],
     activity_types: dict,
+    skipped_result_types: list[str],
 ) -> dict:
     """
     Process a single RecipeExecutionHistory node.
@@ -290,6 +312,8 @@ def _process_recipe(
     :param traversal_types: TraversalTypes config section.
     :param common_fields: List of common field paths to extract.
     :param activity_types: ActivityTypes config section.
+    :param skipped_result_types: Result ``$type`` short names marking
+        activities that were scheduled but not executed.
     :return: Dict keyed by activity name -> activity data.
     """
     repeated_type = traversal_types.get(
@@ -331,6 +355,7 @@ def _process_recipe(
                 activity_node=activity_node,
                 common_fields=common_fields,
                 activity_types=activity_types,
+                skipped_result_types=skipped_result_types,
             )
             if activity_data:
                 activity_name = activity_data.get(
@@ -349,6 +374,7 @@ def _extract_activity_data(
     activity_node: dict,
     common_fields: list[str],
     activity_types: dict,
+    skipped_result_types: list[str],
 ) -> dict:
     """
     Extract common and activity-specific data from an
@@ -359,9 +385,21 @@ def _extract_activity_data(
         from every activity (e.g. ``"Result.Status"``).
     :param activity_types: ActivityTypes config section with per-activity
         extraction rules.
+    :param skipped_result_types: Result ``$type`` short names marking
+        activities that were scheduled but not executed.
     :return: Flat dict with extracted fields plus a ``Data`` dict
-        for activity-specific results.
+        for activity-specific results. Empty dict for skipped
+        activities, which the caller drops.
     """
+    # ASV logs a placeholder activity (Result typed SkippedResult,
+    # HasData false, but Status still "Finished") when a dynamic
+    # autofunction's EveryN schedule was evaluated but the activity
+    # did not execute. Drop these so the history reflects what
+    # physically ran.
+    result_type = _get_short_type(activity_node.get("Result") or {})
+    if result_type in skipped_result_types:
+        return {}
+
     # Extract common fields
     extracted = {}
     for field_path in common_fields:

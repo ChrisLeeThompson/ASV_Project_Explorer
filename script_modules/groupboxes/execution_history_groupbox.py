@@ -9,9 +9,10 @@ Layout (top to bottom):
 - QLabel for the site, step, and detector context.
 - Search row: [QLineEdit (search)] [QCheckBox (Expand All)]
 - QTreeWidget with two columns (Activity/Field, Value) showing:
-    - Activities listed in execution order (sorted by ExecutionOrder).
+    - Activities listed in execution order (sorted by ExecutionOrder),
+      pooled across every step that ran on the slice.
     - Each activity shows child rows for status, calculated duration,
-      recipe, timestamps, and activity-specific result data
+      owning step, timestamps, and activity-specific result data
       (e.g. working distance values, fiducial match scores).
 
 The group box starts in a placeholder state ("No slice selected")
@@ -227,7 +228,7 @@ class ExecutionHistoryGroupBox(QGroupBox):
 
         Flattens all activities across recipes, sorts by ExecutionOrder,
         and displays each activity with child rows for status, duration,
-        recipe, timestamps, and activity-specific result data.
+        owning step, timestamps, and activity-specific result data.
 
         :param execution_history: ExecutionHistory dict keyed by
             recipe name, with activity dicts as values.
@@ -284,10 +285,13 @@ class ExecutionHistoryGroupBox(QGroupBox):
                     QTreeWidgetItem(["CalculatedDuration", duration])
                 )
 
-            # Child: Recipe name
+            # Child: owning step (the RecipeName in ExecutionHistory.json
+            # is the ASV step name). Every step that ran on the slice is
+            # pooled into this tree, so this row distinguishes identically
+            # named activities from different steps.
             if recipe_name:
                 activity_item.addChild(
-                    QTreeWidgetItem(["Recipe", recipe_name])
+                    QTreeWidgetItem(["Step", recipe_name])
                 )
 
             # Child: Error message (only shown when present)

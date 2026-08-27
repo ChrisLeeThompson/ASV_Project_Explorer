@@ -346,6 +346,12 @@
                 "Result.Message"
             ]
         },
+        "SkippedResultTypes": {
+            "_comment": "Result $type short names that mark activities ASV scheduled but did not execute. ASV writes a SkippedResult placeholder (Status 'Finished', HasData false) on each slice where a dynamic autofunction's EveryN schedule was evaluated but the autofunction did not run; the parser drops matching activities so the history only contains activities that physically ran.",
+            "Types": [
+                "SkippedResult"
+            ]
+        },
         "ActivityTypes": {
             "_comment": "Activity-specific extraction rules keyed by ActivityName as it appears in the JSON. FunctionType is used for validation against Result.FunctionType when present. DataPaths are dot-notation paths within Result.Data to extract. IncludeSharpnessData is an optional flag for activities that produce sharpness curve data.",
             "Auto Focus": {

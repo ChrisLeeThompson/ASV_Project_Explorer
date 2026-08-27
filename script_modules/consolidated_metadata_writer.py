@@ -20,7 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 # Format identifier written to consolidated metadata files for validation.
-FORMAT_ID = "ASVProjectExplorerMetadata"
+# The ".2" suffix invalidates consolidated files written before the
+# parser dropped SkippedResult placeholder activities: stale files are
+# rejected at load, so the project must be re-parsed.
+FORMAT_ID = "ASVProjectExplorerMetadata.2"
 
 
 def write_consolidated_metadata(
