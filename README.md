@@ -52,7 +52,10 @@ Temp Metadata File** removes the auto-generated one.
 ## Compatibility
 
 ASV version 5.11 was used as the basis for the parsing algorithms. Projects
-from older ASV versions may not parse correctly.
+from older ASV versions may not parse correctly. Cross-section and spin mill
+projects are both supported — type-specific parameters (fiducials, rocking
+mill, spin mill stage Z correction) are extracted only for the matching
+project type.
 
 Much of what the parsers look for is data-driven rather than hard-coded — the
 field paths, plot definitions, and execution-history extraction rules all live

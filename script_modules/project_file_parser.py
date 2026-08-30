@@ -12,16 +12,20 @@ The Project.AsvProject hierarchy::
     ├── Name                         (project name)
     ├── Properties                   (project-level warning flags)
     └── Sites[]
+        ├── $type                    (site type: CrossSectionSiteDto,
+        │                             SpinMillSiteDto, ...)
         ├── Properties.Name          (site name)
         ├── IsEnabledForExecution
         ├── Context                  (site-level setup parameters)
         │   ├── Slicing
         │   ├── Specimen
         │   ├── Milling
-        │   ├── FiducialDefinition
-        │   ├── FiducialConditions
-        │   ├── RoughFiducialConditions
-        │   └── RockingMillContext
+        │   ├── FiducialDefinition       (cross-section)
+        │   ├── FiducialConditions       (cross-section)
+        │   ├── RoughFiducialConditions  (cross-section)
+        │   ├── RockingMillContext       (cross-section)
+        │   ├── SpinMill                 (spin mill)
+        │   └── ZCorrectionContext       (spin mill)
         └── Recipes[]
             ├── Name                 (recipe name)
             ├── Schedule             (recipe-level schedule)
@@ -38,6 +42,7 @@ Output structure::
         "Sites": [
             {
                 "SiteName": "Life Science - Cryo",
+                "SiteType": "CrossSectionSiteDto",
                 "IsEnabledForExecution": true,
                 "SiteContext": {
                     "Slicing": {"SliceThickness": 2e-08, ...},
@@ -173,9 +178,11 @@ def _process_site(
     """
     properties = raw_site.get("Properties", {})
     site_name = properties.get("Name", "Unknown Site")
+    site_type = _get_short_type(raw_site)
 
     site_data = {
         "SiteName": site_name,
+        "SiteType": site_type,
         "IsEnabledForExecution": raw_site.get("IsEnabledForExecution", False),
     }
 
@@ -183,7 +190,7 @@ def _process_site(
     raw_context = raw_site.get("Context", {})
     if raw_context and site_context_config:
         site_data["SiteContext"] = _extract_site_context(
-            raw_context, site_context_config
+            raw_context, site_context_config, site_type
         )
     else:
         site_data["SiteContext"] = {}
@@ -211,22 +218,33 @@ def _process_site(
 def _extract_site_context(
     raw_context: dict,
     site_context_config: dict,
+    site_type: str,
 ) -> dict:
     """
     Extract user-facing parameters from the site-level Context.
 
     Iterates over the configured context sections (e.g. Slicing,
     Milling, Specimen) and extracts the specified fields from each.
+    A section rule may carry an optional ``SiteTypes`` allowlist of
+    site ``$type`` short names (e.g. ``["SpinMillSiteDto"]``); the
+    section is then extracted only for sites of a listed type.
+    Rules without ``SiteTypes`` apply to every site type.
 
     :param raw_context: The ``Context`` dict from a site node.
     :param site_context_config: Config defining which sections and
         fields to extract.
+    :param site_type: Short ``$type`` name of the site being
+        processed (empty string if the site has no ``$type``).
     :return: Dict keyed by section name with extracted fields.
     """
     sections_config = site_context_config.get("Sections", {})
     result = {}
 
     for section_name, section_rules in sections_config.items():
+        allowed_types = section_rules.get("SiteTypes")
+        if allowed_types and site_type not in allowed_types:
+            continue
+
         raw_section = raw_context.get(section_name)
         if raw_section is None:
             continue

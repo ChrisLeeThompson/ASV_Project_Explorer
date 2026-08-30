@@ -442,10 +442,11 @@
     "ProjectFileConfig": {
         "_comment": "Configuration for parsing Project.AsvProject files. Defines extraction rules at the site context, recipe context, and activity levels. Data is shown in the Project Parameters tab of the UI.",
         "SiteContext": {
-            "_comment": "Fields to extract from each Site.Context subsection. Each key matches a Context subsection name. ExtractFields uses dot-notation paths resolved within that subsection.",
+            "_comment": "Fields to extract from each Site.Context subsection. Each key matches a Context subsection name. ExtractFields uses dot-notation paths resolved within that subsection; paths absent from a file are skipped. Optional SiteTypes lists the site $type short names (SpinMillSiteDto, CrossSectionSiteDto) a section applies to; omit it to extract the section for every site type.",
             "Sections": {
                 "Slicing": {
                     "ExtractFields": [
+                        "TotalSlices",
                         "SliceThickness",
                         "MilledThickness"
                     ]
@@ -457,6 +458,7 @@
                     ]
                 },
                 "Milling": {
+                    "_comment": "Shared by both site types: cross-section files supply the depth/length/cut-face fields, spin mill files supply Diameter.",
                     "ExtractFields": [
                         "MillingDepth",
                         "MillingLength",
@@ -470,10 +472,28 @@
                         "Hfw",
                         "OriginalStagePosition",
                         "ScanRotation",
-                        "OriginalBeamShift"
+                        "OriginalBeamShift",
+                        "Diameter"
+                    ]
+                },
+                "SpinMill": {
+                    "_comment": "Spin mill site context. MillingPositions (one stage position per spin index) is omitted as too verbose for the tree; NumberOfMillingPositions summarises it.",
+                    "SiteTypes": [
+                        "SpinMillSiteDto"
+                    ],
+                    "ExtractFields": [
+                        "RotationType",
+                        "NumberOfMillingPositions",
+                        "MillingAngle",
+                        "BeamDefocusCoefficient",
+                        "ZCompensationVector",
+                        "InitialZCompensationVector"
                     ]
                 },
                 "FiducialDefinition": {
+                    "SiteTypes": [
+                        "CrossSectionSiteDto"
+                    ],
                     "ExtractFields": [
                         "IsDefined",
                         "Score",
@@ -481,6 +501,9 @@
                     ]
                 },
                 "FiducialConditions": {
+                    "SiteTypes": [
+                        "CrossSectionSiteDto"
+                    ],
                     "ExtractFields": [
                         "HighVoltage",
                         "BeamCurrent",
@@ -491,6 +514,9 @@
                     ]
                 },
                 "RoughFiducialConditions": {
+                    "SiteTypes": [
+                        "CrossSectionSiteDto"
+                    ],
                     "ExtractFields": [
                         "IsRoughAlignmentEnabled",
                         "HighVoltage",
@@ -500,16 +526,42 @@
                     ]
                 },
                 "RockingMillContext": {
+                    "SiteTypes": [
+                        "CrossSectionSiteDto"
+                    ],
                     "ExtractFields": [
                         "IsRockingMillEnabled",
                         "RockingMillAngles",
                         "BeamIntensity"
                     ]
                 },
+                "ZCorrectionContext": {
+                    "_comment": "Spin mill stage Z correction. GrabReferenceEveryNthSlice is the correction cadence set in the ASV UI; ImageParameters are the reference-grab imaging conditions. Stigmator, StagePosition, and BeamShift are omitted as transient machine state.",
+                    "SiteTypes": [
+                        "SpinMillSiteDto"
+                    ],
+                    "ExtractFields": [
+                        "IsEnabled",
+                        "GrabReferenceEveryNthSlice",
+                        "ImageParameters.HighVoltage",
+                        "ImageParameters.BeamCurrent",
+                        "ImageParameters.DwellTime",
+                        "ImageParameters.Hfw",
+                        "ImageParameters.WorkingDistance",
+                        "ImageParameters.DetectorsSetup",
+                        "ImageParameters.ScanRotation",
+                        "ImageParameters.FrameIntegration",
+                        "ImageParameters.ScanResolution.Width",
+                        "ImageParameters.ScanResolution.Height"
+                    ]
+                },
                 "SiteImage": {
+                    "_comment": "Current ASV versions nest the field of view under ScanFieldOfView; the flat Hfw/Vfw paths are kept for older file versions.",
                     "ExtractFields": [
                         "Hfw",
                         "Vfw",
+                        "ScanFieldOfView.Hfw",
+                        "ScanFieldOfView.Vfw",
                         "Image.RelativePath"
                     ]
                 },
@@ -548,7 +600,7 @@
             }
         },
         "ActivityLevel": {
-            "_comment": "Extraction rules for activity parameters within each recipe. CommonScheduleFields are extracted from every activity's Schedule. Activities defines per-activity ExtractParameters lists. Use 'ALL' to extract everything except InternalFields. The _DEFAULT_ rule applies to any activity not explicitly listed.",
+            "_comment": "Extraction rules for activity parameters within each recipe. CommonScheduleFields are extracted from every activity's Schedule. Activities defines per-activity ExtractParameters lists. Use 'ALL' to extract everything except InternalFields. The _DEFAULT_ rule applies to any activity not explicitly listed. Activity names match exactly (case-sensitive); they need no site-type scoping because the two templates only share activities whose parameters are identical.",
             "CommonScheduleFields": [
                 "IsEnabled",
                 "EveryN",
@@ -652,11 +704,12 @@
                     ]
                 },
                 "Spin Milling": {
-                    "_comment": "Spin mill template activity.",
+                    "_comment": "Spin mill template activity. Current ASV versions store TotalSlices, NumberOfMillingPositions, SliceThickness, MillingAngle, and BeamDefocusCoefficient in the site Context instead; kept here for versions that inline them on the activity node.",
                     "ExtractParameters": [
                         "SpinMillType",
                         "DwellTime",
                         "Pitch",
+                        "NumberOfPasses",
                         "CorrectionFactor",
                         "ApplicationFile",
                         "MaterialTypeApplicationFile",
@@ -689,8 +742,8 @@
                         "PositionIndex"
                     ]
                 },
-                "Stage Z correction": {
-                    "_comment": "Spin mill template activity.",
+                "Stage Z Correction": {
+                    "_comment": "Spin mill template activity. Current ASV versions store these in the site Context.ZCorrectionContext instead; kept here for versions that inline them on the activity node.",
                     "ExtractParameters": [
                         "GrabReferenceEveryNthSlice",
                         "IsEnabled"
