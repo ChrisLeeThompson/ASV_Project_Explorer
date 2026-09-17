@@ -1,8 +1,13 @@
 # ASV Project Explorer
 
-<!-- Full documentation: https://<site>/scripts/asv_project_explorer/ (enable this link when the site is live) -->
+> [!NOTE]
+> **Full documentation:** https://chrisleethompson.github.io/scripts/asv_project_explorer/
 
 A PySide6 desktop utility for exploring Thermo Scientific Auto Slice and View (ASV) project metadata. Point it at an ASV project directory and it consolidates the per-slice metadata into a single JSON file. From there you can plot any metadata field against slice index, browse the image behind each point, and inspect the execution history and project parameters that produced it. The data helps with tracking a project's progress, analyzing data quality, and troubleshooting ASV issues.
+
+## Documentation
+
+Full documentation: https://chrisleethompson.github.io/scripts/asv_project_explorer/
 
 ## Features
 
