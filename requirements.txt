@@ -1,13 +1,16 @@
 # ASV Project Explorer - Python Dependencies
+#
+# Version floors are the versions in the Thermo Fisher AutoScript 4.14
+# Python environment (Python 3.11.14), where the app is developed and tested.
 
 # Qt GUI framework
-PySide6>=6.8.0
+PySide6>=6.7.1
 
 # Scientific plotting
-matplotlib>=3.8.0
+matplotlib>=3.8.1
 
 # Numerical computing (also a matplotlib dependency)
-numpy>=1.26.0
+numpy>=2.2.5
 
 # TIFF file reading and metadata extraction
-tifffile>=2024.1.30
+tifffile>=2025.3.13
